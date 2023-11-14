@@ -18,8 +18,11 @@ package main
 
 import (
 	"flag"
+	"github.com/Gentleelephant/vector-sidecar/internal/constants"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
 	"os"
-
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -50,11 +53,13 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
+	var role string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&role, "role", "Aggregator", "The role of the controller")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -81,6 +86,28 @@ func main() {
 		// if you are doing or is intended to do any operation such as perform cleanups
 		// after the manager stops then its usage might be unsafe.
 		// LeaderElectionReleaseOnCancel: true,
+		NewCache: func(config *rest.Config, opts cache.Options) (cache.Cache, error) {
+			if role != constants.Aggregator && role != constants.Agent {
+				role = constants.Aggregator
+			}
+			labelSelector := metav1.LabelSelector{
+				//MatchExpressions: []metav1.LabelSelectorRequirement{
+				//	{
+				//		Key:      constants.SecretLabelKey,
+				//		Operator: metav1.LabelSelectorOpIn,
+				//		Values:   []string{role},
+				//	},
+				//},
+				MatchLabels: map[string]string{constants.SecretLabelKey: role},
+			}
+			selector, err := metav1.LabelSelectorAsSelector(&labelSelector)
+			if err != nil {
+				return nil, err
+			}
+			opts.DefaultLabelSelector = selector
+			// Specific selectors per type of object
+			return cache.New(config, opts)
+		},
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
