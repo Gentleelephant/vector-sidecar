@@ -7,4 +7,9 @@ layout:
 - go.kubebuilder.io/v4
 projectName: vector-sidecar
 repo: github.com/Gentleelephant/vector-sidecar
+resources:
+- controller: true
+  domain: kubesphere.io
+  kind: Secret
+  version: v1alpha1
 version: "3"
