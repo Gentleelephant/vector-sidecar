@@ -61,7 +61,7 @@ func (r *SecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	for s, bytes := range secret.Data {
 		// write the file
-		path := fmt.Sprintf("%s/%s.yaml", constants.FilePath, s)
+		path := fmt.Sprintf("%s/%s", constants.FilePath, s)
 		err = os.WriteFile(path, bytes, 0644)
 		if err != nil {
 			return ctrl.Result{}, err
