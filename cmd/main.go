@@ -68,7 +68,7 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
-	setupLog.Info("Current mode is ", role)
+	setupLog.Info("Current mode is " + role)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
@@ -111,6 +111,9 @@ func main() {
 			return cache.New(config, opts)
 		},
 	})
+
+	//setupLog.Info("Current mode is ", role)
+
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
