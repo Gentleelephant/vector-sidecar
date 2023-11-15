@@ -18,10 +18,11 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"github.com/Gentleelephant/vector-sidecar/internal/constants"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/klog/v2"
-
 	"k8s.io/apimachinery/pkg/runtime"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -48,10 +49,24 @@ type SecretReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.15.0/pkg/reconcile
 func (r *SecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
-
-	// TODO(user): your logic here
-	klog.Info("reconcile secret:", req.Namespace, req.Name)
-
+	secret := &v1.Secret{}
+	err := r.Get(ctx, req.NamespacedName, secret)
+	if client.IgnoreNotFound(err) != nil {
+		// remove the file
+		err = os.Remove(req.Name)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, err
+	}
+	for s, bytes := range secret.Data {
+		// write the file
+		path := fmt.Sprintf("%s/%s", constants.FilePath, s)
+		err = os.WriteFile(path, bytes, 0644)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 	return ctrl.Result{}, nil
 }
 
