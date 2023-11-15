@@ -79,8 +79,8 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 .PHONY: docker-build
 docker-build: test ## Build docker image with the manager.
-	$(CONTAINER_TOOL) build -t ${IMG} .
-
+	@echo "Building..."
+	$(CONTAINER_TOOL) buildx build --push --platform linux/amd64,linux/arm64 -f Dockerfile . -t ${IMG}
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
 	$(CONTAINER_TOOL) push ${IMG}
