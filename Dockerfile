@@ -29,6 +29,6 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o ma
 FROM scratch
 WORKDIR /
 COPY --from=builder /workspace/manager .
-USER nonroot:nonroot
+#USER nonroot:nonroot
 
 ENTRYPOINT ["/manager"]
