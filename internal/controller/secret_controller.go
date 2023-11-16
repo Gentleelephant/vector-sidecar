@@ -63,6 +63,7 @@ func (r *SecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			if err != nil {
 				return ctrl.Result{}, err
 			}
+			logoger.Info("delete file", "path", path)
 		}
 	} else {
 		for s, bytes := range secret.Data {
