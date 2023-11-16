@@ -51,20 +51,27 @@ func (r *SecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	_ = log.FromContext(ctx)
 	secret := &v1.Secret{}
 	err := r.Get(ctx, req.NamespacedName, secret)
-	if client.IgnoreNotFound(err) != nil {
-		// remove the file
-		err = os.Remove(req.Name)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, err
+	if err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	for s, bytes := range secret.Data {
-		// write the file
-		path := fmt.Sprintf("%s/%s", constants.FilePath, s)
-		err = os.WriteFile(path, bytes, 0644)
-		if err != nil {
-			return ctrl.Result{}, err
+
+	if !secret.ObjectMeta.DeletionTimestamp.IsZero() {
+		for s, _ := range secret.Data {
+			//delete the file
+			path := fmt.Sprintf("%s/%s", constants.FilePath, s)
+			err = os.Remove(path)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+	} else {
+		for s, bytes := range secret.Data {
+			// write the file
+			path := fmt.Sprintf("%s/%s", constants.FilePath, s)
+			err = os.WriteFile(path, bytes, 0644)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 	}
 	return ctrl.Result{}, nil
