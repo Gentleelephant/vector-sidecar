@@ -100,7 +100,7 @@ func main() {
 				//		Values:   []string{role},
 				//	},
 				//},
-				MatchLabels: map[string]string{constants.SecretLabelKey: role},
+				MatchLabels: map[string]string{constants.SecretLabel: role},
 			}
 			selector, err := metav1.LabelSelectorAsSelector(&labelSelector)
 			if err != nil {

@@ -6,4 +6,5 @@ const (
 	Agent           = "Agent"
 	FilePath        = "/etc/vector"
 	SecretFinalizer = "finalizers.kubesphere.io/secret-finalizer"
+	SecretLabel     = "vector.kubesphere.io/secret-config"
 )
